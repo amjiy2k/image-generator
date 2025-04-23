@@ -1,0 +1,1207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Image Generator | Prompt to Art</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --secondary: #a29bfe;
+            --dark: #2d3436;
+            --light: #f5f6fa;
+            --accent: #fd79a8;
+            --success: #00b894;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo i {
+            color: var(--accent);
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .nav-links a:hover {
+            color: var(--accent);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            background: var(--accent);
+            bottom: -5px;
+            left: 0;
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .mobile-menu {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 4rem 0;
+            text-align: center;
+            background: url('https://images.unsplash.com/photo-1635070041078-e363dbe005cb?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80') no-repeat center center/cover;
+            position: relative;
+            color: white;
+        }
+        
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+        }
+        
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(to right, var(--accent), var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+        
+        /* Generator Section */
+        .generator {
+            padding: 4rem 0;
+            background-color: white;
+            border-radius: 15px;
+            margin: 2rem auto;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+        }
+        
+        .generator-container {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        
+        .generator-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+        
+        .generator-header h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .generator-header p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .generator-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            max-width: 800px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        .form-group input, 
+        .form-group textarea,
+        .form-group select {
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+        
+        .form-group input:focus, 
+        .form-group textarea:focus,
+        .form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(108, 92, 231, 0.2);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 1.5rem;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .ratio-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+        
+        .ratio-option {
+            flex: 1;
+            position: relative;
+        }
+        
+        .ratio-option input {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .ratio-option label {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            height: 100%;
+            text-align: center;
+        }
+        
+        .ratio-option label:hover {
+            border-color: var(--secondary);
+        }
+        
+        .ratio-option input:checked + label {
+            border-color: var(--primary);
+            background-color: rgba(108, 92, 231, 0.1);
+        }
+        
+        .ratio-option .ratio-icon {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .ratio-option input:checked + label .ratio-icon {
+            color: var(--primary);
+        }
+        
+        .generate-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 1rem;
+        }
+        
+        .generate-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(108, 92, 231, 0.3);
+        }
+        
+        .generate-btn:active {
+            transform: translateY(0);
+        }
+        
+        .generate-btn i {
+            font-size: 1.2rem;
+        }
+        
+        /* Results Section */
+        .results {
+            display: none;
+            margin-top: 2rem;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .results-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .results-header h3 {
+            font-size: 1.5rem;
+            color: var(--primary);
+        }
+        
+        .download-btn {
+            background-color: var(--success);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background-color: #00997a;
+        }
+        
+        .image-result {
+            width: 100%;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            background-color: #f8f9fa;
+            min-height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+        }
+        
+        .image-placeholder {
+            text-align: center;
+            padding: 2rem;
+            color: #666;
+        }
+        
+        .image-placeholder i {
+            font-size: 3rem;
+            color: #ddd;
+            margin-bottom: 1rem;
+        }
+        
+        .generated-image {
+            max-width: 100%;
+            max-height: 500px;
+            display: none;
+        }
+        
+        .loading {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            z-index: 10;
+        }
+        
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Gallery Section */
+        .gallery {
+            padding: 4rem 0;
+            background-color: #f9f9f9;
+        }
+        
+        .gallery-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .gallery-header h2 {
+            font-size: 2.2rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .gallery-header p {
+            color: #666;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        .gallery-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .gallery-item {
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 250px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .gallery-item-info {
+            padding: 1rem;
+            background-color: white;
+        }
+        
+        .gallery-item-info h3 {
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+            color: var(--dark);
+        }
+        
+        .gallery-item-info p {
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 3rem 0 1.5rem;
+        }
+        
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .footer-column h3 {
+            font-size: 1.3rem;
+            margin-bottom: 1.5rem;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .footer-column h3::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background: var(--primary);
+            bottom: -8px;
+            left: 0;
+        }
+        
+        .footer-column p {
+            margin-bottom: 1rem;
+            opacity: 0.8;
+        }
+        
+        .footer-links {
+            list-style: none;
+        }
+        
+        .footer-links li {
+            margin-bottom: 0.8rem;
+        }
+        
+        .footer-links a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .footer-links a:hover {
+            opacity: 1;
+            color: var(--accent);
+            transform: translateX(5px);
+        }
+        
+        .social-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+        
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            color: white;
+            transition: all 0.3s ease;
+        }
+        
+        .social-links a:hover {
+            background-color: var(--primary);
+            transform: translateY(-3px);
+        }
+        
+        .footer-bottom {
+            text-align: center;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0.7;
+            font-size: 0.9rem;
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .generator-header h2,
+            .gallery-header h2 {
+                font-size: 1.8rem;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .ratio-options {
+                flex-wrap: wrap;
+            }
+            
+            .ratio-option {
+                flex: 1 0 calc(50% - 5px);
+            }
+        }
+        
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: #333;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        
+        .toast.success {
+            background-color: var(--success);
+        }
+        
+        .toast.error {
+            background-color: #d63031;
+        }
+        
+        .toast i {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav>
+                <div class="logo">
+                    <i class="fas fa-magic"></i>
+                    <span>AI Art Studio</span>
+                </div>
+                <div class="nav-links">
+                    <a href="#home">Home</a>
+                    <a href="#generator">Generator</a>
+                    <a href="#gallery">Gallery</a>
+                    <a href="#about">About</a>
+                </div>
+                <div class="mobile-menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <h1>Transform Words into Stunning Art</h1>
+                <p>Our AI-powered image generator creates unique visuals from your text prompts. Unleash your creativity and bring your ideas to life.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Generator Section -->
+    <section class="generator" id="generator">
+        <div class="container">
+            <div class="generator-container">
+                <div class="generator-header">
+                    <h2>AI Image Generator</h2>
+                    <p>Describe what you want to see and our AI will generate it for you. Be as detailed as possible for best results.</p>
+                </div>
+                
+                <form id="imageGeneratorForm" class="generator-form">
+                    <div class="form-group">
+                        <label for="prompt">Describe your image</label>
+                        <textarea id="prompt" placeholder="A futuristic cityscape at sunset with flying cars and neon lights..." required></textarea>
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="style">Art Style</label>
+                            <select id="style">
+                                <option value="">Realistic</option>
+                                <option value="digital art">Digital Art</option>
+                                <option value="fantasy art">Fantasy Art</option>
+                                <option value="anime">Anime</option>
+                                <option value="watercolor">Watercolor</option>
+                                <option value="oil painting">Oil Painting</option>
+                                <option value="3d render">3D Render</option>
+                                <option value="pixel art">Pixel Art</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="quality">Quality</label>
+                            <select id="quality">
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                                <option value="ultra">Ultra</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Image Ratio</label>
+                        <div class="ratio-options">
+                            <div class="ratio-option">
+                                <input type="radio" id="ratio-square" name="ratio" value="1:1" checked>
+                                <label for="ratio-square">
+                                    <i class="fas fa-square ratio-icon"></i>
+                                    Square (1:1)
+                                </label>
+                            </div>
+                            <div class="ratio-option">
+                                <input type="radio" id="ratio-portrait" name="ratio" value="3:4">
+                                <label for="ratio-portrait">
+                                    <i class="fas fa-portrait ratio-icon"></i>
+                                    Portrait (3:4)
+                                </label>
+                            </div>
+                            <div class="ratio-option">
+                                <input type="radio" id="ratio-landscape" name="ratio" value="16:9">
+                                <label for="ratio-landscape">
+                                    <i class="fas fa-desktop ratio-icon"></i>
+                                    Landscape (16:9)
+                                </label>
+                            </div>
+                            <div class="ratio-option">
+                                <input type="radio" id="ratio-wide" name="ratio" value="2:1">
+                                <label for="ratio-wide">
+                                    <i class="fas fa-image ratio-icon"></i>
+                                    Wide (2:1)
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="generate-btn">
+                        <i class="fas fa-wand-magic-sparkles"></i>
+                        Generate Image
+                    </button>
+                </form>
+                
+                <div class="results" id="results">
+                    <div class="results-header">
+                        <h3>Your Generated Image</h3>
+                        <button class="download-btn" id="downloadBtn">
+                            <i class="fas fa-download"></i>
+                            Download
+                        </button>
+                    </div>
+                    
+                    <div class="image-result">
+                        <div class="image-placeholder">
+                            <i class="fas fa-image"></i>
+                            <p>Your generated image will appear here</p>
+                        </div>
+                        <img id="generatedImage" class="generated-image" alt="Generated image">
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p>Generating your image...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section class="gallery" id="gallery">
+        <div class="container">
+            <div class="gallery-header">
+                <h2>Inspiration Gallery</h2>
+                <p>Explore images generated by our community to get inspiration for your creations.</p>
+            </div>
+            
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1682686580391-615b3f4e56a8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="AI generated art">
+                    <div class="gallery-item-info">
+                        <h3>Cosmic Explorer</h3>
+                        <p>"An astronaut floating in space surrounded by colorful nebulae"</p>
+                    </div>
+                </div>
+                
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1682695796954-bad0d0f59ff1?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="AI generated art">
+                    <div class="gallery-item-info">
+                        <h3>Enchanted Forest</h3>
+                        <p>"A magical forest with glowing plants and fairies at twilight"</p>
+                    </div>
+                </div>
+                
+                <div class="gallery-item">
+                    <img src="https://images.unsplash.com/photo-1682686580391-615b3f4e56a8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDF8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80" alt="AI generated art">
+                    <div class="gallery-item-info">
+                        <h3>Cyberpunk Alley</h3>
+                        <p>"A rainy neon-lit alley in a futuristic Asian metropolis"</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>AI Art Studio</h3>
+                    <p>Transforming your imagination into stunning visual art with the power of artificial intelligence.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-discord"></i></a>
+                    </div>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Quick Links</h3>
+                    <ul class="footer-links">
+                        <li><a href="#home"><i class="fas fa-chevron-right"></i> Home</a></li>
+                        <li><a href="#generator"><i class="fas fa-chevron-right"></i> Generator</a></li>
+                        <li><a href="#gallery"><i class="fas fa-chevron-right"></i> Gallery</a></li>
+                        <li><a href="#about"><i class="fas fa-chevron-right"></i> About</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Resources</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Documentation</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> API Reference</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Community</a></li>
+                        <li><a href="#"><i class="fas fa-chevron-right"></i> Blog</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Contact</h3>
+                    <ul class="footer-links">
+                        <li><a href="#"><i class="fas fa-envelope"></i> contact@aiartstudio.com</a></li>
+                        <li><a href="#"><i class="fas fa-phone"></i> +1 (555) 123-4567</a></li>
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> San Francisco, CA</a></li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="footer-bottom">
+                <p>&copy; 2023 AI Art Studio. All rights reserved. | <a href="#" style="color: var(--accent);">Privacy Policy</a> | <a href="#" style="color: var(--accent);">Terms of Service</a></p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Notification -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // Replace this with your actual Hugging Face API token
+        const HF_API_TOKEN = "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";
+        
+        // DOM Elements
+        const form = document.getElementById('imageGeneratorForm');
+        const promptInput = document.getElementById('prompt');
+        const styleSelect = document.getElementById('style');
+        const qualitySelect = document.getElementById('quality');
+        const ratioOptions = document.querySelectorAll('input[name="ratio"]');
+        const resultsSection = document.getElementById('results');
+        const generatedImage = document.getElementById('generatedImage');
+        const imagePlaceholder = document.querySelector('.image-placeholder');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loadingIndicator = document.getElementById('loading');
+        const toast = document.getElementById('toast');
+        
+        // Event Listeners
+        form.addEventListener('submit', generateImage);
+        downloadBtn.addEventListener('click', downloadImage);
+        
+        // Generate Image Function
+        async function generateImage(e) {
+            e.preventDefault();
+            
+            // Show loading indicator
+            loadingIndicator.style.display = 'flex';
+            imagePlaceholder.style.display = 'none';
+            generatedImage.style.display = 'none';
+            
+            // Prepare the prompt
+            let prompt = promptInput.value.trim();
+            const style = styleSelect.value;
+            const quality = qualitySelect.value;
+            const ratio = document.querySelector('input[name="ratio"]:checked').value;
+            
+            // Add style to prompt if selected
+            if (style) {
+                prompt += `, ${style} style`;
+            }
+            
+            if (!prompt) {
+                showToast('Please enter a prompt', 'error');
+                loadingIndicator.style.display = 'none';
+                imagePlaceholder.style.display = 'flex';
+                return;
+            }
+            
+            try {
+                // Determine dimensions based on ratio
+                let width, height;
+                switch(ratio) {
+                    case '1:1':
+                        width = 512;
+                        height = 512;
+                        break;
+                    case '3:4':
+                        width = 512;
+                        height = 682;
+                        break;
+                    case '16:9':
+                        width = 1024;
+                        height = 576;
+                        break;
+                    case '2:1':
+                        width = 1024;
+                        height = 512;
+                        break;
+                    default:
+                        width = 512;
+                        height = 512;
+                }
+                
+                // Adjust dimensions based on quality
+                if (quality === 'high') {
+                    width = Math.floor(width * 1.5);
+                    height = Math.floor(height * 1.5);
+                } else if (quality === 'ultra') {
+                    width = width * 2;
+                    height = height * 2;
+                }
+                
+                // Call Hugging Face API
+                const response = await fetch(
+                    "https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${HF_API_TOKEN}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            inputs: prompt,
+                            parameters: {
+                                width: width,
+                                height: height,
+                                num_inference_steps: quality === 'ultra' ? 100 : (quality === 'high' ? 75 : 50),
+                                guidance_scale: 7.5
+                            },
+                            options: {
+                                wait_for_model: true
+                            }
+                        })
+                    }
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                // Get the image blob
+                const imageBlob = await response.blob();
+                const imageUrl = URL.createObjectURL(imageBlob);
+                
+                // Display the generated image
+                generatedImage.src = imageUrl;
+                generatedImage.style.display = 'block';
+                loadingIndicator.style.display = 'none';
+                resultsSection.style.display = 'block';
+                
+                // Enable download button
+                downloadBtn.dataset.imageUrl = imageUrl;
+                
+                // Show success message
+                showToast('Image generated successfully!', 'success');
+                
+                // Scroll to results
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error generating image:', error);
+                loadingIndicator.style.display = 'none';
+                imagePlaceholder.style.display = 'flex';
+                showToast('Failed to generate image. Please try again.', 'error');
+            }
+        }
+        
+        // Download Image Function
+        function downloadImage() {
+            const imageUrl = downloadBtn.dataset.imageUrl;
+            if (!imageUrl) return;
+            
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = `ai-generated-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('Download started!', 'success');
+        }
+        
+        // Show Toast Notification
+        function showToast(message, type) {
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        });
+        
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    navLinks.style.display = 'none';
+                }
+            });
+        });
+        
+        // Responsive adjustments
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                navLinks.style.display = 'flex';
+            } else {
+                navLinks.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
+        // DOM Elements
+        const form = document.getElementById('imageGeneratorForm');
+        const promptInput = document.getElementById('prompt');
+        const styleSelect = document.getElementById('style');
+        const qualitySelect = document.getElementById('quality');
+        const resultsSection = document.getElementById('results');
+        const generatedImage = document.getElementById('generatedImage');
+        const imagePlaceholder = document.querySelector('.image-placeholder');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const loadingIndicator = document.getElementById('loading');
+        const toast = document.getElementById('toast');
+        
+        // Event Listeners
+        form.addEventListener('submit', generateImage);
+        downloadBtn.addEventListener('click', downloadImage);
+        
+        // Generate Image Function
+        async function generateImage(e) {
+            e.preventDefault();
+            
+            // Show loading indicator
+            loadingIndicator.style.display = 'flex';
+            imagePlaceholder.style.display = 'none';
+            generatedImage.style.display = 'none';
+            
+            // Prepare the prompt
+            let prompt = promptInput.value.trim();
+            const style = styleSelect.value;
+            const quality = qualitySelect.value;
+            
+            if (style) {
+                prompt += `, ${style} style`;
+            }
+            
+            if (!prompt) {
+                showToast('Please enter a prompt', 'error');
+                loadingIndicator.style.display = 'none';
+                imagePlaceholder.style.display = 'flex';
+                return;
+            }
+            
+            try {
+                // Call Hugging Face API
+                const response = await fetch(
+                    "https://api-inference.huggingface.co/models/runwayml/stable-diffusion-v1-5",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${HF_API_TOKEN}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            inputs: prompt,
+                            options: {
+                                wait_for_model: true
+                            }
+                        })
+                    }
+                );
+                
+                if (!response.ok) {
+                    throw new Error(`API request failed with status ${response.status}`);
+                }
+                
+                // Get the image blob
+                const imageBlob = await response.blob();
+                const imageUrl = URL.createObjectURL(imageBlob);
+                
+                // Display the generated image
+                generatedImage.src = imageUrl;
+                generatedImage.style.display = 'block';
+                loadingIndicator.style.display = 'none';
+                resultsSection.style.display = 'block';
+                
+                // Enable download button
+                downloadBtn.dataset.imageUrl = imageUrl;
+                
+                // Show success message
+                showToast('Image generated successfully!', 'success');
+                
+                // Scroll to results
+                resultsSection.scrollIntoView({ behavior: 'smooth' });
+                
+            } catch (error) {
+                console.error('Error generating image:', error);
+                loadingIndicator.style.display = 'none';
+                imagePlaceholder.style.display = 'flex';
+                showToast('Failed to generate image. Please try again.', 'error');
+            }
+        }
+        
+        // Download Image Function
+        function downloadImage() {
+            const imageUrl = downloadBtn.dataset.imageUrl;
+            if (!imageUrl) return;
+            
+            const link = document.createElement('a');
+            link.href = imageUrl;
+            link.download = `ai-generated-${Date.now()}.jpg`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            showToast('Download started!', 'success');
+        }
+        
+        // Show Toast Notification
+        function showToast(message, type) {
+            toast.innerHTML = `
+                <i class="fas ${type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle'}"></i>
+                <span>${message}</span>
+            `;
+            toast.className = `toast ${type} show`;
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.querySelector('.mobile-menu');
+        const navLinks = document.querySelector('.nav-links');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.style.display = navLinks.style.display === 'flex' ? 'none' : 'flex';
+        });
+        
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 768) {
+                    navLinks.style.display = 'none';
+                }
+            });
+        });
+        
+        // Responsive adjustments
+        window.addEventListener('resize', () => {
+            if (window.innerWidth > 768) {
+                navLinks.style.display = 'flex';
+            } else {
+                navLinks.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
